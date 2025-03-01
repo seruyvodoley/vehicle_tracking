@@ -33,3 +33,5 @@ gradlew assembleRelease
 ```bash
 gradlew assembleDebug
 ```
+### 4. Перейдите по пути в проекте, там будут лежать папки с релизом или отладочной версией
+$ VehicleTracking\app\build\outputs\apk
