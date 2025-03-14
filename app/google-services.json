@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "504639269975-frgu95e7vu0atrd0jn30acd8qkov30go.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vehicletracking",
+            "certificate_hash": "37d5ee2ee3576914e1e709e7a319348d36a31c00"
+          }
+        },
+        {
           "client_id": "504639269975-mb68hk19g3ukfkk9v327ulglkubb40oi.apps.googleusercontent.com",
           "client_type": 3
         }

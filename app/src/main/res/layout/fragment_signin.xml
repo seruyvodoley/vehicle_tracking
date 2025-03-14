@@ -101,9 +101,8 @@
             android:textSize="16sp" />
     </LinearLayout>
 
-    <!-- Кнопка Регистрация -->
     <Button
-        android:id="@+id/register"
+        android:id="@+id/signin"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="-170dp"
@@ -126,7 +125,7 @@
 
     <!-- Кнопка Google Sign-In -->
     <Button
-        android:id="@+id/GoogleSignIn"
+        android:id="@+id/GoogleSignIn_button"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

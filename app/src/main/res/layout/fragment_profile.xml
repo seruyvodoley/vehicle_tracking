@@ -51,5 +51,16 @@
         android:layout_marginBottom="30dp"
         android:textColor="#7A7A7A"/>
 
+    <!-- Кнопка выхода -->
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Выйти"
+        android:textSize="16sp"
+        android:backgroundTint="@color/blue"
+        android:textColor="@color/white"
+        android:padding="12dp"
+        android:layout_marginTop="350dp"/>
 
 </LinearLayout>

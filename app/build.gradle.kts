@@ -36,8 +36,11 @@ dependencies {
 
     implementation(libs.appcompat)
     implementation(libs.material)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
-    implementation( libs.firebase.auth)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(platform(libs.firebase.bom))
     implementation(libs.play.services.auth)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -46,4 +49,6 @@ dependencies {
     implementation(libs.sdp.android )
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.kprogresshud)
+    implementation ("com.google.android.gms:play-services-auth:20.1.0")
 }
