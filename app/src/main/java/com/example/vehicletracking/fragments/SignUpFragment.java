@@ -1,4 +1,4 @@
-package com.example.vehicletracking;
+package com.example.vehicletracking.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.vehicletracking.R;
+import com.example.vehicletracking.activities.MainActivity;
+import com.example.vehicletracking.models.userModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -64,7 +67,7 @@ public class SignUpFragment extends Fragment {
         googleSignUpButton = view.findViewById(R.id.GoogleSignIn);
         Button btnLogin = view.findViewById(R.id.btnLoginTab);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id)) // Убедись, что у тебя есть этот ID в strings.xml
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 

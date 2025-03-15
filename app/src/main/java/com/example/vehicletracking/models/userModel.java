@@ -1,4 +1,4 @@
-package com.example.vehicletracking;
+package com.example.vehicletracking.models;
 
 public class userModel {
     private String userName, userEmail, userPassword, userId;

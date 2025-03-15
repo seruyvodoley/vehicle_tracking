@@ -1,4 +1,4 @@
-package com.example.vehicletracking;
+package com.example.vehicletracking.activities;
 
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +7,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.vehicletracking.R;
+import com.example.vehicletracking.fragments.MapFragment;
+import com.example.vehicletracking.fragments.ProfileFragment;
+import com.example.vehicletracking.fragments.SignInFragment;
+import com.example.vehicletracking.fragments.TransportFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
