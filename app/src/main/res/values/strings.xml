@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Vehicle Tracking</string>
+    <string name="default_web_client_id">504639269975-mb68hk19g3ukfkk9v327ulglkubb40oi.apps.googleusercontent.com</string>
+
 </resources>

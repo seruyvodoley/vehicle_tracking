@@ -27,14 +27,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setVisibility(View.GONE); // Скрываем по умолчанию
+        bottomNavigationView.setVisibility(View.GONE);
 
         FirebaseApp.initializeApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, new SignInFragment()) // По умолчанию экран входа
+                    .replace(R.id.container, new SignInFragment())
                     .commit();
         }
 
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkUserStatus() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
-            openSignInFragment(); // Открываем экран входа и скрываем панель навигации
+            openSignInFragment();
         } else {
             currentUser.getIdToken(true).addOnCompleteListener(task -> {
                 if (task.isSuccessful() && task.getResult().getToken() != null) {
@@ -85,16 +85,16 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    // Метод для выхода из профиля
-    public void logOut() {
-        firebaseAuth.signOut();
-        openSignInFragment();
+
+    // Метод для скрытия навигационной панели
+    public void hideBottomNavigation() {
+        bottomNavigationView.setVisibility(View.GONE);
     }
 
     // Метод для открытия экрана входа и скрытия навигации
     private void openSignInFragment() {
         if (bottomNavigationView != null) {
-            bottomNavigationView.setVisibility(View.GONE); // Гарантированно скрываем панель
+            bottomNavigationView.setVisibility(View.GONE);
         }
 
         getSupportFragmentManager().beginTransaction()
