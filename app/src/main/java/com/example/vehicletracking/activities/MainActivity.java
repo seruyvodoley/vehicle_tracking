@@ -2,24 +2,18 @@ package com.example.vehicletracking.activities;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.fragments.MapFragment;
-import com.example.vehicletracking.fragments.ProfileFragment;
+import com.example.vehicletracking.activities.ProfileFragment_CRUD;
 import com.example.vehicletracking.fragments.SignInFragment;
 import com.example.vehicletracking.fragments.TransportFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseAuth firebaseAuth;
     private BottomNavigationView bottomNavigationView;
+    private String currentUsername; // Имя текущего пользователя
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,39 +21,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setVisibility(View.GONE); // Скрываем по умолчанию
-
-        FirebaseApp.initializeApp(this);
-        firebaseAuth = FirebaseAuth.getInstance();
+        bottomNavigationView.setVisibility(View.GONE); // По умолчанию скрываем навигацию
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, new SignInFragment()) // По умолчанию экран входа
+                    .replace(R.id.container, new SignInFragment_CRUD()) // Стартовый экран - вход
                     .commit();
         }
-
-        checkUserStatus();
     }
 
-    // Метод для проверки статуса пользователя
-    private void checkUserStatus() {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) {
-            openSignInFragment(); // Открываем экран входа и скрываем панель навигации
-        } else {
-            currentUser.getIdToken(true).addOnCompleteListener(task -> {
-                if (task.isSuccessful() && task.getResult().getToken() != null) {
-                    openMainNavigation();
-                } else {
-                    openSignInFragment();
-                }
-            });
-        }
-    }
-
-    // Метод для показа навигационной панели
-    private void openMainNavigation() {
-        bottomNavigationView.setVisibility(View.VISIBLE); // Делаем панель видимой
+    // **Метод для показа навигационной панели после входа**
+    public void openMainNavigation(String username) {
+        this.currentUsername = username; // Запоминаем пользователя
+        bottomNavigationView.setVisibility(View.VISIBLE); // Показываем навигацию
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
@@ -69,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (item.getItemId() == R.id.nav_transport) {
                 selectedFragment = new TransportFragment();
             } else if (item.getItemId() == R.id.nav_profile) {
-                selectedFragment = new ProfileFragment();
+                selectedFragment = ProfileFragment_CRUD.newInstance(currentUsername);
             }
 
             if (selectedFragment != null) {
@@ -80,25 +54,18 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        // Открываем профиль сразу после входа
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new ProfileFragment())
+                .replace(R.id.container, ProfileFragment_CRUD.newInstance(currentUsername))
                 .commit();
     }
 
-    // Метод для выхода из профиля
+    // **Метод для выхода из системы**
     public void logOut() {
-        firebaseAuth.signOut();
-        openSignInFragment();
-    }
-
-    // Метод для открытия экрана входа и скрытия навигации
-    private void openSignInFragment() {
-        if (bottomNavigationView != null) {
-            bottomNavigationView.setVisibility(View.GONE); // Гарантированно скрываем панель
-        }
-
+        currentUsername = null;
+        bottomNavigationView.setVisibility(View.GONE); // Скрываем навигацию
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new SignInFragment())
+                .replace(R.id.container, new SignInFragment()) // Переход на экран входа
                 .commit();
     }
 }

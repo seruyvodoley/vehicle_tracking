@@ -43,7 +43,7 @@ public class ProfileFragment extends Fragment {
         // Кнопка выхода из аккаунта
         Button logoutButton = view.findViewById(R.id.btnLogout);
         logoutButton.setOnClickListener(v -> {
-            ((MainActivity) getActivity()).logOut();
+            //((MainActivity) getActivity()).logOut();
         });
 
 
