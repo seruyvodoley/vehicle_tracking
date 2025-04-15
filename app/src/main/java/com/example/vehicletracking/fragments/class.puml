@@ -1,0 +1,61 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' ------------------ CarModel ---------------------
+class CarModel {
+  - name: String
+  - model: String
+  - number: String
+  - latitude: String
+  - longitude: String
+  - imageUrl: String
+  + CarModel(...)
+}
+
+' ------------------ AddCarViewModel ---------------------
+class AddCarViewModel {
+  - isUploading: MutableLiveData<Boolean>
+  - isSuccess: MutableLiveData<Boolean>
+  - errorMessage: MutableLiveData<String>
+  - firebaseFirestore: FirebaseFirestore
+  - firebaseStorage: FirebaseStorage
+  - singletonInstance: AddCarViewModel
+
+  + getInstance(): AddCarViewModel
+  + uploadImageAndCar(imageUri: Uri, name: String, model: String, number: String, lat: String, lon: String)
+  + uploadCarWithoutImage(name: String, model: String, number: String, lat: String, lon: String)
+  + getFusedLocationClient(context: Context): FusedLocationProviderClient
+
+  <<Singleton>>
+  <<Factory>>
+  <<Observer>>
+}
+
+' ------------------ AddCar_Fragment ---------------------
+class AddCar_Fragment {
+  - carName: EditText
+  - carModel: EditText
+  - carNumber: EditText
+  - carImageView: ImageView
+  - carLocation: TextView
+  - getLocationSwitch: Switch
+  - addCarButton: Button
+  - imageUri: Uri
+  - latitude: String
+  - longitude: String
+  - bitmap: Bitmap
+  - locationManager: LocationManager
+  - progressHUD: KProgressHUD
+  - viewModel: AddCarViewModel
+
+  + onCreateView(...)
+  + openImagePicker()
+  + checkLocationPermission()
+  + getCurrentLocation()
+  + promptEnableGPS()
+}
+
+AddCar_Fragment --> AddCarViewModel : uses
+AddCarViewModel --> CarModel : creates
+
+@enduml

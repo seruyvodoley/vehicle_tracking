@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
@@ -50,5 +51,6 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     implementation(libs.kprogresshud)
+
     implementation ("com.google.android.gms:play-services-auth:20.1.0")
 }

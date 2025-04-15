@@ -8,69 +8,80 @@
     android:gravity="center"
     android:background="@color/light_gray"
     android:padding="20dp">
-
-    <!-- Камера (иконка) -->
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginBottom="20dp"
-        android:padding="20dp"
-        android:src="@drawable/camera"
-        android:background="@drawable/circle_background"/>
-
-    <!-- Поле: Car Name -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="Введите название машины"
-        android:padding="12dp"
-        android:textSize="16sp"/>
-
-    <!-- Поле: Car Model -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="Введите модель машины"
-        android:padding="12dp"
-        android:textSize="16sp"
-        android:layout_marginTop="10dp"/>
-
-    <!-- Поле: Car Number -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="Введите номер машины"
-        android:padding="12dp"
-        android:textSize="16sp"
-        android:layout_marginTop="10dp"/>
-
-    <!-- Переключатель: Switch On Current Location -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.google.android.material.card.MaterialCardView
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="10dp">
+        android:layout_width="wrap_content"
+        android:id="@+id/SelectPhoto" />
+        <!-- Камера (иконка) -->
+        <ImageView
+            android:id="@+id/carImage"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="20dp"
+            android:padding="20dp"
+            android:src="@drawable/camera"
+            android:background="@drawable/circle_background"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <!-- Поле: Car Name -->
+        <EditText
+            android:id="@+id/carName"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Введите название машины"
+            android:padding="12dp"
+            android:textSize="16sp"/>
+
+        <!-- Поле: Car Model -->
+        <EditText
+            android:id="@+id/carModel"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Введите модель машины"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp"/>
+
+        <!-- Поле: Car Number -->
+        <EditText
+            android:id="@+id/carNumber"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Введите номер машины"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp"/>
+
+        <!-- Переключатель: Switch On Current Location -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Включить текущее местоположение"
-            android:textSize="14sp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp">
 
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/carLocation"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Включить текущее местоположение"
+                android:textSize="14sp"/>
 
-    <!-- Кнопка Upload -->
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Загрузить"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@color/blue"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"/>
+            <Switch
+                android:id="@+id/switcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Кнопка Upload -->
+        <Button
+            android:id="@+id/addCar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Загрузить"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/blue"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"/>
+
 </LinearLayout>
