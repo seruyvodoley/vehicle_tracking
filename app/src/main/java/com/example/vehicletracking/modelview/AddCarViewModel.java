@@ -93,7 +93,5 @@ public class AddCarViewModel extends ViewModel {
                 });
     }
 
-    public FusedLocationProviderClient getFusedLocationClient(Context context) {
-        return LocationServices.getFusedLocationProviderClient(context);
-    }
+
 }

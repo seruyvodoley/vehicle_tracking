@@ -2,60 +2,73 @@
 skinparam classAttributeIconSize 0
 
 ' ------------------ CarModel ---------------------
-class CarModel {
-  - name: String
-  - model: String
-  - number: String
-  - latitude: String
-  - longitude: String
-  - imageUrl: String
-  + CarModel(...)
+package models{
+    class CarModel {
+      - name: String
+      - model: String
+      - number: String
+      - latitude: String
+      - longitude: String
+      - imageUrl: String
+      + CarModel(...)
+    }
 }
 
 ' ------------------ AddCarViewModel ---------------------
-class AddCarViewModel {
-  - isUploading: MutableLiveData<Boolean>
-  - isSuccess: MutableLiveData<Boolean>
-  - errorMessage: MutableLiveData<String>
-  - firebaseFirestore: FirebaseFirestore
-  - firebaseStorage: FirebaseStorage
-  - singletonInstance: AddCarViewModel
+package modelview{
+    class AddCarViewModel {
+      - isUploading: MutableLiveData<Boolean>
+      - isSuccess: MutableLiveData<Boolean>
+      - errorMessage: MutableLiveData<String>
+      - firebaseFirestore: FirebaseFirestore
+      - firebaseStorage: FirebaseStorage
+      - singletonInstance: AddCarViewModel
 
-  + getInstance(): AddCarViewModel
-  + uploadImageAndCar(imageUri: Uri, name: String, model: String, number: String, lat: String, lon: String)
-  + uploadCarWithoutImage(name: String, model: String, number: String, lat: String, lon: String)
-  + getFusedLocationClient(context: Context): FusedLocationProviderClient
+      + getInstance(): AddCarViewModel
+      + uploadImageAndCar(imageUri: Uri, name: String, model: String, number: String, lat: String, lon: String)
+      + uploadCarWithoutImage(name: String, model: String, number: String, lat: String, lon: String)
+      + getFusedLocationClient(context: Context): FusedLocationProviderClient
 
-  <<Singleton>>
-  <<Factory>>
-  <<Observer>>
+      <<Singleton>>
+      <<Factory>>
+      <<Observer>>
+    }
+}
+package "Fragments" {
+    class AddCar_Fragment {
+        - EditText carName
+        - EditText carModel
+        - EditText carNumber
+        - ImageView carImageView
+        - TextView carLocation
+        - Switch getLocationSwitch
+        - Button addCarButton
+        - Uri imageUri
+        - String latitude
+        - String longitude
+        - Bitmap bitmap
+        - LocationManager locationManager
+        - LocationAdapter locationAdapter
+        - KProgressHUD progressHUD
+        - AddCarViewModel viewModel
+        --
+        + onCreateView()
+        + checkLocationPermission()
+        + getCurrentLocation()
+    }
+}
+package "Utils" {
+    class LocationAdapter {
+        - FusedLocationProviderClient fusedLocationClient
+        --
+        + LocationAdapter(context)
+        + getClient() : FusedLocationProviderClient
+    }
 }
 
-' ------------------ AddCar_Fragment ---------------------
-class AddCar_Fragment {
-  - carName: EditText
-  - carModel: EditText
-  - carNumber: EditText
-  - carImageView: ImageView
-  - carLocation: TextView
-  - getLocationSwitch: Switch
-  - addCarButton: Button
-  - imageUri: Uri
-  - latitude: String
-  - longitude: String
-  - bitmap: Bitmap
-  - locationManager: LocationManager
-  - progressHUD: KProgressHUD
-  - viewModel: AddCarViewModel
-
-  + onCreateView(...)
-  + openImagePicker()
-  + checkLocationPermission()
-  + getCurrentLocation()
-  + promptEnableGPS()
-}
-
-AddCar_Fragment --> AddCarViewModel : uses
-AddCarViewModel --> CarModel : creates
+AddCar_Fragment ..> AddCarViewModel : uses
+AddCarViewModel ..> CarModel : creates
+AddCar_Fragment ..> LocationAdapter : uses
+LocationAdapter --* FusedLocationProviderClient : adapts
 
 @enduml

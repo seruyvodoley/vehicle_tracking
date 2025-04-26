@@ -26,8 +26,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.modelview.AddCarViewModel;
+import com.example.vehicletracking.utils.LocationAdapter;
 import com.google.android.material.card.MaterialCardView;
 import io.github.rupinderjeet.kprogresshud.KProgressHUD;
+
 import java.io.IOException;
 
 public class AddCar_Fragment extends Fragment {
@@ -48,12 +50,14 @@ public class AddCar_Fragment extends Fragment {
     private MaterialCardView SelectPhoto;
 
     private AddCarViewModel viewModel;
+    private LocationAdapter locationAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_addcar_info, container, false);
 
         viewModel = new ViewModelProvider(this).get(AddCarViewModel.class);
+        locationAdapter = new LocationAdapter(requireContext());
 
         carName = view.findViewById(R.id.carName);
         carModel = view.findViewById(R.id.carModel);
@@ -193,7 +197,7 @@ public class AddCar_Fragment extends Fragment {
             return;
         }
 
-        viewModel.getFusedLocationClient(requireContext()).getLastLocation().addOnSuccessListener(location -> {
+        locationAdapter.getClient().getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
                 latitude = String.valueOf(location.getLatitude());
                 longitude = String.valueOf(location.getLongitude());
