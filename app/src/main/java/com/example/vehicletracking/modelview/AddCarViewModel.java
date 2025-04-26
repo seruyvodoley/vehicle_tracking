@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.vehicletracking.models.CarModel;
+import com.example.vehicletracking.utils.CarModelFactory;
+import com.example.vehicletracking.utils.ConcreteCarModelFactory;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,11 +49,10 @@ public class AddCarViewModel extends ViewModel {
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
 
     // Factory: создание CarModel
+    private final CarModelFactory carModelFactory = new ConcreteCarModelFactory();
     private CarModel createCarModel(String name, String model, String number, String photoUrl, String lat, String lon) {
-        String userId = Objects.requireNonNull(auth.getCurrentUser()).getUid();
-        return new CarModel(name, model, number, "", photoUrl, lat, lon, userId);
+        return carModelFactory.createCarModel(name, model, number, photoUrl, lat, lon);
     }
-
     public void uploadImageAndCar(Uri imageUri, String name, String model, String number, String lat, String lon) {
         isUploading.setValue(true);
         final StorageReference imgRef = storageReference.child("photo/" + UUID.randomUUID());

@@ -70,7 +70,7 @@ public class AddCar_Fragment extends Fragment {
 
         locationManager = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
 
-        // LiveData observers
+        // наблюдатели
         viewModel.getIsUploading().observe(getViewLifecycleOwner(), uploading -> {
             if (uploading) {
                 if (progressHUD == null) {

@@ -10,7 +10,14 @@ package models{
       - latitude: String
       - longitude: String
       - imageUrl: String
-      + CarModel(...)
+      + CarModel(name: String, model: String, number: String, latitude: String, longitude: String, imageUrl: String)
+    }
+}
+
+' ------------------ CarModelFactory ---------------------
+package "Factories" {
+    class CarModelFactory {
+      + createCarModel(name: String, model: String, number: String, photoUrl: String, lat: String, lon: String): CarModel
     }
 }
 
@@ -23,6 +30,7 @@ package modelview{
       - firebaseFirestore: FirebaseFirestore
       - firebaseStorage: FirebaseStorage
       - singletonInstance: AddCarViewModel
+      - carModelFactory: CarModelFactory
 
       + getInstance(): AddCarViewModel
       + uploadImageAndCar(imageUri: Uri, name: String, model: String, number: String, lat: String, lon: String)
@@ -30,10 +38,11 @@ package modelview{
       + getFusedLocationClient(context: Context): FusedLocationProviderClient
 
       <<Singleton>>
-      <<Factory>>
       <<Observer>>
     }
 }
+
+' ------------------ AddCar_Fragment ---------------------
 package "Fragments" {
     class AddCar_Fragment {
         - EditText carName
@@ -57,18 +66,21 @@ package "Fragments" {
         + getCurrentLocation()
     }
 }
+
+' ------------------ LocationAdapter ---------------------
 package "Utils" {
     class LocationAdapter {
         - FusedLocationProviderClient fusedLocationClient
         --
-        + LocationAdapter(context)
+        + LocationAdapter(context: Context)
         + getClient() : FusedLocationProviderClient
     }
 }
 
 AddCar_Fragment ..> AddCarViewModel : uses
 AddCarViewModel ..> CarModel : creates
+AddCarViewModel ..> CarModelFactory : uses
 AddCar_Fragment ..> LocationAdapter : uses
-LocationAdapter --* FusedLocationProviderClient : adapts
+LocationAdapter *--> FusedLocationProviderClient : adapts
 
 @enduml
