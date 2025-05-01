@@ -6,7 +6,11 @@ plugins {
 android {
     namespace = "com.example.vehicletracking"
     compileSdk = 35
-
+    android {
+        buildFeatures {
+            buildConfig = true
+        }
+    }
     defaultConfig {
         applicationId = "com.example.vehicletracking"
         minSdk = 30
@@ -15,6 +19,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "GOOGLE_MAPS_API_KEY",
+            "\"AIzaSyCVS-NTjrfxc-l5iRXFADlP1N81fAypV2U\""
+        )
     }
 
     buildTypes {
@@ -48,9 +55,9 @@ dependencies {
     implementation(libs.kotlin.stdlib.jdk7)
     implementation(libs.material.v190)
     implementation(libs.sdp.android )
-    implementation(libs.play.services.maps)
-    implementation(libs.play.services.location)
     implementation(libs.kprogresshud)
+    implementation(libs.play.services.maps.v1920)
+    implementation(libs.play.services.location.v1700)
 
     implementation ("com.google.android.gms:play-services-auth:20.1.0")
 }

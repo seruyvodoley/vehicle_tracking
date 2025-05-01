@@ -15,7 +15,7 @@ package models{
 }
 
 ' ------------------ CarModelFactory ---------------------
-package "Factories" {
+package "Utils" {
     class CarModelFactory {
       + createCarModel(name: String, model: String, number: String, photoUrl: String, lat: String, lon: String): CarModel
     }
@@ -81,6 +81,6 @@ AddCar_Fragment ..> AddCarViewModel : uses
 AddCarViewModel ..> CarModel : creates
 AddCarViewModel ..> CarModelFactory : uses
 AddCar_Fragment ..> LocationAdapter : uses
-LocationAdapter *--> FusedLocationProviderClient : adapts
+LocationAdapter o--> FusedLocationProviderClient : adapts
 
 @enduml

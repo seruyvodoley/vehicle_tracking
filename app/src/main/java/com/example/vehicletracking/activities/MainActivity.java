@@ -1,12 +1,14 @@
 package com.example.vehicletracking.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.vehicletracking.BuildConfig;
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.fragments.MapFragment;
 import com.example.vehicletracking.fragments.ProfileFragment;
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setVisibility(View.GONE);
+        Log.d("GoogleMaps", "Maps API Key: " + BuildConfig.GOOGLE_MAPS_API_KEY);
+
 
         FirebaseApp.initializeApp(this);
         firebaseAuth = FirebaseAuth.getInstance();

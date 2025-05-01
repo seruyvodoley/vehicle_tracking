@@ -13,7 +13,9 @@ kprogresshud = "1.0.0"
 material = "1.10.0"
 materialVersion = "1.9.0"
 playServicesAuth = "21.3.0"
+playServicesLocation = "17.0.0"
 playServicesMaps = "19.1.0"
+playServicesMapsVersion = "19.2.0"
 sdpAndroid = "1.1.1"
 firebaseDatabase = "21.0.0"
 firebaseStorage = "21.0.1"
@@ -32,7 +34,9 @@ material = { group = "com.google.android.material", name = "material", version.r
 material-v190 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesAuth" }
+play-services-location-v1700 = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+play-services-maps-v1920 = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMapsVersion" }
 sdp-android = { module = "com.intuit.sdp:sdp-android", version.ref = "sdpAndroid" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
