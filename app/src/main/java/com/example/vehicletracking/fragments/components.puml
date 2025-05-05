@@ -1,55 +1,41 @@
 @startuml
 
-' Настройка визуального стиля
 skinparam componentStyle rectangle
 skinparam defaultTextAlignment center
 
-' Цветовая схема:
+' ==== Цветовая схема ====
 ' #CDEAFF – UI слой (Fragments)
-' #DFFFD6 – ViewModels
-' #F9D6D5 – Utils / Simulation (Логика и данные)
-' #EEE8FF – Interfaces (Контракты и абстракции)
+' #DFFFD6 – Трекинг / Контроль
+' #F9D6D5 – Симуляция (данные, генерация координат)
+' #EEE8FF – Абстракции / Интерфейсы
 
 ' ==== UI Layer ====
-package "Fragments (UI)\n[Separation of Concerns]" <<Rectangle>> #CDEAFF {
+package "UI Layer\n[Контроль потока, ограничение видимости]" <<Rectangle>> #CDEAFF {
   [MapFragment]
-  [TransportFragment]
 }
 
-' ==== ViewModel Layer ====
-package "ViewModels\n[ViewModel First,\nDirected Dependencies]" <<Rectangle>> #DFFFD6 {
-  [MapViewModel]
-  [TrackingViewModel]
-  [TransportViewModel]
+' ==== Tracking Logic ====
+package "Tracking\n[Макс. связность,\nминим. связность]" <<Rectangle>> #DFFFD6 {
+  [VehicleTracker]
 }
 
-' ==== Data & Simulation Layer ====
-package "Utils / Simulation\n[Explicit Dependencies]" <<Rectangle>> #F9D6D5 {
+' ==== Simulation ====
+package "Simulation\n[Ограничение видимости]" <<Rectangle>> #F9D6D5 {
   [VehicleLocationSimulator]
-  [GpsBeacon]
-  [CarAdapter]
 }
 
-' ==== Interfaces & Contracts ====
-package "Interfaces\n[Directed Dependencies]" <<Rectangle>> #EEE8FF {
+' ==== Interfaces ====
+package "Interfaces\n[Dependency Inversion]" <<Rectangle>> #EEE8FF {
   [LocationProvider]
   [LocationCallback]
-  [OnCarClickListener]
 }
 
 ' ==== Directed Dependencies ====
-[MapFragment] --> [MapViewModel] : uses
-[TransportFragment] --> [TransportViewModel] : uses
-[TransportFragment] --> [CarAdapter] : uses
+[MapFragment] --> [VehicleTracker] : delegates
+[VehicleTracker] --> [LocationProvider] : uses
+[VehicleLocationSimulator] --> [LocationCallback] : callback
 
-[MapViewModel] --> [LocationProvider] : depends on abstraction
-[TrackingViewModel] --> [LocationProvider] : depends on abstraction
-
-[CarAdapter] --> [OnCarClickListener] : callback interface
-[VehicleLocationSimulator] --> [LocationCallback] : implements
-
-' ==== Реализация интерфейсов ====
+' ==== Interface Implementation ====
 [VehicleLocationSimulator] ..|> [LocationProvider]
-[TransportFragment] ..|> [OnCarClickListener]
 
 @enduml
