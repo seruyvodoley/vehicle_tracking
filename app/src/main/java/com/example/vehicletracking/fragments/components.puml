@@ -1,0 +1,55 @@
+@startuml
+
+' Настройка визуального стиля
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+' Цветовая схема:
+' #CDEAFF – UI слой (Fragments)
+' #DFFFD6 – ViewModels
+' #F9D6D5 – Utils / Simulation (Логика и данные)
+' #EEE8FF – Interfaces (Контракты и абстракции)
+
+' ==== UI Layer ====
+package "Fragments (UI)\n[Separation of Concerns]" <<Rectangle>> #CDEAFF {
+  [MapFragment]
+  [TransportFragment]
+}
+
+' ==== ViewModel Layer ====
+package "ViewModels\n[ViewModel First,\nDirected Dependencies]" <<Rectangle>> #DFFFD6 {
+  [MapViewModel]
+  [TrackingViewModel]
+  [TransportViewModel]
+}
+
+' ==== Data & Simulation Layer ====
+package "Utils / Simulation\n[Explicit Dependencies]" <<Rectangle>> #F9D6D5 {
+  [VehicleLocationSimulator]
+  [GpsBeacon]
+  [CarAdapter]
+}
+
+' ==== Interfaces & Contracts ====
+package "Interfaces\n[Directed Dependencies]" <<Rectangle>> #EEE8FF {
+  [LocationProvider]
+  [LocationCallback]
+  [OnCarClickListener]
+}
+
+' ==== Directed Dependencies ====
+[MapFragment] --> [MapViewModel] : uses
+[TransportFragment] --> [TransportViewModel] : uses
+[TransportFragment] --> [CarAdapter] : uses
+
+[MapViewModel] --> [LocationProvider] : depends on abstraction
+[TrackingViewModel] --> [LocationProvider] : depends on abstraction
+
+[CarAdapter] --> [OnCarClickListener] : callback interface
+[VehicleLocationSimulator] --> [LocationCallback] : implements
+
+' ==== Реализация интерфейсов ====
+[VehicleLocationSimulator] ..|> [LocationProvider]
+[TransportFragment] ..|> [OnCarClickListener]
+
+@enduml

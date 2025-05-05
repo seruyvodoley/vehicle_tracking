@@ -8,15 +8,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.vehicletracking.R;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
+import com.example.vehicletracking.modelview.MapTrackingViewModel;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapFragment extends Fragment {
 
@@ -24,7 +21,7 @@ public class MapFragment extends Fragment {
     private double latitude;
     private double longitude;
     private String carName;
-
+    private MapTrackingViewModel viewModel;
 
     @Nullable
     @Override
@@ -48,19 +45,14 @@ public class MapFragment extends Fragment {
             e.printStackTrace();
         }
 
-        mapView.getMapAsync(mapCallback);
+        viewModel = new ViewModelProvider(this).get(MapTrackingViewModel.class);
+
+        mapView.getMapAsync(googleMap -> {
+            viewModel.startTracking(latitude, longitude, googleMap, carName);
+        });
 
         return view;
     }
-
-    private final OnMapReadyCallback mapCallback = new OnMapReadyCallback() {
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            LatLng position = new LatLng(latitude, longitude);
-            googleMap.addMarker(new MarkerOptions().position(position).title(carName));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
-        }
-    };
 
     @Override
     public void onResume() {
@@ -71,6 +63,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onPause() {
         mapView.onPause();
+        viewModel.stopTracking();
         super.onPause();
     }
 

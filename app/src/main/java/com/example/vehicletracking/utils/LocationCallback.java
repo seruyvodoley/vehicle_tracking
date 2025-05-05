@@ -1,6 +1,7 @@
 package com.example.vehicletracking.utils;
 
-// LocationCallback.java
+import com.google.android.gms.maps.model.LatLng;
+
 public interface LocationCallback {
-    void onLocationUpdate(double latitude, double longitude);
+    void onLocationChanged(LatLng newLocation);
 }

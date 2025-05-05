@@ -1,0 +1,70 @@
+@startuml
+
+' Интерфейсы
+interface LocationProvider {
+    +start(callback: LocationCallback)
+    +stop()
+}
+
+interface LocationCallback {
+    +onLocationUpdate(latitude: double, longitude: double)
+}
+
+interface OnCarClickListener {
+    +onCarClick(CarModel car)
+}
+
+' Классы
+class VehicleLocationSimulator implements LocationProvider {
+    -handler: Handler
+    -startLat: double
+    -startLon: double
+    -isRunning: boolean
+    -step: int
+    -callback: LocationCallback
+    +start(callback: LocationCallback)
+    +stop()
+}
+
+class CarModel {
+    -name: String
+    -location: String
+    -imageUrl: String
+}
+
+class CarAdapter {
+    -carList: List<CarModel>
+    -listener: OnCarClickListener
+}
+
+class MapFragment implements LocationCallback {
+    -mapView: MapView
+    -viewModel: MapViewModel
+}
+
+class MapViewModel {
+    -locationProvider: LocationProvider
+}
+
+class TrackingViewModel {
+    -carModel: CarModel
+}
+
+class TransportFragment {
+    -recyclerView: RecyclerView
+    -viewModel: TransportViewModel
+}
+
+LocationProvider <|.. VehicleLocationSimulator
+LocationCallback <|.. MapFragment
+MapFragment --> MapViewModel
+MapFragment --> VehicleLocationSimulator
+MapFragment --> CarModel
+MapViewModel --> LocationProvider
+CarAdapter --> CarModel
+CarAdapter --> OnCarClickListener
+TransportFragment --> CarAdapter
+TransportFragment --> CarModel
+TransportFragment --> TrackingViewModel
+
+@enduml

@@ -56,8 +56,8 @@ dependencies {
     implementation(libs.material.v190)
     implementation(libs.sdp.android )
     implementation(libs.kprogresshud)
-    implementation(libs.play.services.maps.v1920)
     implementation(libs.play.services.location.v1700)
+    implementation (libs.play.services.maps.v1920)
 
     implementation ("com.google.android.gms:play-services-auth:20.1.0")
 }
