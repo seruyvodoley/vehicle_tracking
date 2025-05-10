@@ -1,8 +1,6 @@
-package com.example.vehicletracking.fragments;
+package com.example.vehicletracking.tracking.utils;
 
-import com.example.vehicletracking.utils.LocationProvider;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 

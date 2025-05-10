@@ -1,9 +1,7 @@
-package com.example.vehicletracking.fragments;
+package com.example.vehicletracking.tracking.utils;
 
 import android.os.Handler;
 
-import com.example.vehicletracking.utils.LocationCallback;
-import com.example.vehicletracking.utils.LocationProvider;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Random;

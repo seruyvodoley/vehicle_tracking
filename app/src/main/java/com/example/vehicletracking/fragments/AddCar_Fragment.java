@@ -26,7 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.modelview.AddCarViewModel;
-import com.example.vehicletracking.utils.LocationAdapter;
+import com.example.vehicletracking.tracking.utils.LocationAdapter;
 import com.google.android.material.card.MaterialCardView;
 import io.github.rupinderjeet.kprogresshud.KProgressHUD;
 

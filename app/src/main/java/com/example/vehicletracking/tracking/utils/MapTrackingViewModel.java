@@ -1,9 +1,7 @@
-package com.example.vehicletracking.modelview;
+package com.example.vehicletracking.tracking.utils;
 
 import androidx.lifecycle.ViewModel;
 
-import com.example.vehicletracking.fragments.VehicleLocationSimulator;
-import com.example.vehicletracking.fragments.VehicleTracker;
 import com.google.android.gms.maps.GoogleMap;
 
 public class MapTrackingViewModel extends ViewModel {

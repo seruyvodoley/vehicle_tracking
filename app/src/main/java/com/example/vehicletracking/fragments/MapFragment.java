@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.vehicletracking.R;
-import com.example.vehicletracking.modelview.MapTrackingViewModel;
+import com.example.vehicletracking.tracking.utils.MapTrackingViewModel;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 

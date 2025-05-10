@@ -30,7 +30,7 @@ class MapTrackingViewModel {
     +stopTracking()
 }
 
-LocationProvider <|.. VehicleLocationSimulator
+
 LocationCallback <|.. VehicleTracker
 VehicleTracker --> LocationProvider
 MapTrackingViewModel --> VehicleTracker

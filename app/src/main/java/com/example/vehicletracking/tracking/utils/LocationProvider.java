@@ -1,4 +1,4 @@
-package com.example.vehicletracking.utils;
+package com.example.vehicletracking.tracking.utils;
 
 import com.google.android.gms.maps.model.LatLng;
 

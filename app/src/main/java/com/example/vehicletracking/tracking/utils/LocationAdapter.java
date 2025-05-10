@@ -1,4 +1,4 @@
-package com.example.vehicletracking.utils;
+package com.example.vehicletracking.tracking.utils;
 
 import android.content.Context;
 import com.google.android.gms.location.FusedLocationProviderClient;
