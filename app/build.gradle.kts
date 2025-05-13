@@ -58,6 +58,9 @@ dependencies {
     implementation(libs.kprogresshud)
     implementation(libs.play.services.location.v1700)
     implementation (libs.play.services.maps.v1920)
+    // implementation(libs.play.services.identity.credentials)
+    implementation (libs.okhttp)
+    implementation (libs.gson)
 
     implementation ("com.google.android.gms:play-services-auth:20.1.0")
 }

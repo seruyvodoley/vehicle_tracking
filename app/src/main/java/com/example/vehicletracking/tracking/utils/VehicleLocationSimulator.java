@@ -50,6 +50,6 @@ public class VehicleLocationSimulator implements LocationProvider {
 
             callback.onLocationChanged(newLocation);
             simulateMovement();
-        }, 2000); // каждые 2 секунды
+        }, 10000); // каждые 2 секунды
     }
 }
