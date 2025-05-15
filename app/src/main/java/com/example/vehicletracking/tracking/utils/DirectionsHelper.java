@@ -1,5 +1,7 @@
 package com.example.vehicletracking.tracking.utils;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -30,6 +32,7 @@ public class DirectionsHelper {
                 + origin.latitude + "," + origin.longitude
                 + "&destination=" + destination.latitude + "," + destination.longitude
                 + "&key=" + apiKey;
+        Log.d("DirectionsHelper", "URL запроса: " + url);
 
         Request request = new Request.Builder().url(url).build();
 
@@ -47,7 +50,14 @@ public class DirectionsHelper {
                 String body = response.body().string();
                 try {
                     JSONObject json = new JSONObject(body);
+                    String status = json.getString("status");
+                    Log.e("DirectionsStatus", status);
+                    if (!"OK".equals(status)) {
+                        callback.onError("Ошибка Directions API: " + status);
+                        return;
+                    }
                     JSONArray routes = json.getJSONArray("routes");
+
                     if (routes.length() == 0) {
                         callback.onError("Маршрут не найден");
                         return;

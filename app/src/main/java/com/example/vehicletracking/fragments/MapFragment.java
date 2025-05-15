@@ -16,13 +16,13 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.tracking.utils.DirectionsHelper;
 import com.example.vehicletracking.tracking.utils.MapTrackingViewModel;
+import com.example.vehicletracking.utils.WeatherHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
@@ -30,6 +30,7 @@ import java.util.List;
 public class MapFragment extends Fragment {
 
     private MapView mapView;
+    private GoogleMap googleMapInstance;
     private double latitude;
     private double longitude;
     private String carName;
@@ -37,12 +38,20 @@ public class MapFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = view.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
 
-        // ✅ Получаем аргументы сразу, до getMapAsync
+        extractArguments();
+        initializeMap();
+        viewModel = new ViewModelProvider(this).get(MapTrackingViewModel.class);
+
+        return view;
+    }
+
+    private void extractArguments() {
         if (getArguments() != null) {
             try {
                 latitude = Double.parseDouble(getArguments().getString("latitude", "0.0"));
@@ -50,51 +59,53 @@ public class MapFragment extends Fragment {
             } catch (NumberFormatException e) {
                 latitude = 0.0;
                 longitude = 0.0;
-                e.printStackTrace(); // или лог
             }
             carName = getArguments().getString("carName", "Автомобиль");
         }
+    }
 
-
-        mapView.onCreate(savedInstanceState);
-        mapView.onResume();
-
+    private void initializeMap() {
         try {
             MapsInitializer.initialize(requireActivity().getApplicationContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        viewModel = new ViewModelProvider(this).get(MapTrackingViewModel.class);
-
-        // ✅ Единственный вызов getMapAsync — уже с правильными координатами
         mapView.getMapAsync(googleMap -> {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            googleMap.getUiSettings().setZoomControlsEnabled(true);
-            googleMap.getUiSettings().setAllGesturesEnabled(true);
-            googleMap.getUiSettings().setCompassEnabled(true);
-            googleMap.getUiSettings().setMapToolbarEnabled(true);
-            googleMap.setBuildingsEnabled(true);
-            googleMap.setTrafficEnabled(true);
-            googleMap.setIndoorEnabled(true);
+            googleMapInstance = googleMap;
+            configureMapUI(googleMap);
 
-            // Центровка карты
-            LatLng origin = new LatLng(latitude, longitude); // старт
-            LatLng destination = new LatLng(latitude + 0.005, longitude + 0.005); // примерная цель (можно заменить)
+            LatLng origin = new LatLng(latitude, longitude);
+            LatLng destination = new LatLng(latitude + 0.010, longitude + 0.010);
 
-// вызов API
+            // Погода
+            WeatherHelper.getWeather(origin, getString(R.string.openweather_api_key),
+                    new WeatherHelper.WeatherCallback() {
+                        @Override
+                        public void onSuccess(String description, double temperature) {
+                            requireActivity().runOnUiThread(() -> {
+                                TextView weatherText = requireView().findViewById(R.id.weatherText);
+                                weatherText.setText("Погода: " + description + ", " + temperature + "°C");
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            Log.e("WeatherError", message);
+                        }
+                    });
+
+            // Маршрут
             DirectionsHelper.getRoute(origin, destination, getString(R.string.google_maps_key),
                     new DirectionsHelper.RouteCallback() {
                         @Override
                         public void onRouteReceived(List<LatLng> routePoints) {
                             requireActivity().runOnUiThread(() -> {
-                                PolylineOptions polylineOptions = new PolylineOptions()
+                                googleMap.addPolyline(new PolylineOptions()
                                         .addAll(routePoints)
                                         .color(Color.BLUE)
-                                        .width(10);
-                                googleMap.addPolyline(polylineOptions);
-
-                                Marker carMarker = googleMap.addMarker(new MarkerOptions().position(origin).title("Авто"));
+                                        .width(10));
+                                Marker carMarker = googleMap.addMarker(viewModel.getCarMarkerOptions(origin));
                                 viewModel.RouteSimulateMovement(routePoints, googleMap, carMarker);
                             });
                         }
@@ -105,33 +116,51 @@ public class MapFragment extends Fragment {
                         }
                     });
 
-
-            // Старт трекинга
             viewModel.startTracking(latitude, longitude, googleMap, carName);
-
-            // Масштабная шкала
-            googleMap.setOnCameraIdleListener(() -> {
-                float zoom = googleMap.getCameraPosition().zoom;
-
-                String scaleText;
-                if (zoom >= 18) {
-                    scaleText = "Масштаб: 20 м";
-                } else if (zoom >= 16) {
-                    scaleText = "Масштаб: 50 м";
-                } else if (zoom >= 14) {
-                    scaleText = "Масштаб: 100 м";
-                } else if (zoom >= 12) {
-                    scaleText = "Масштаб: 500 м";
-                } else {
-                    scaleText = "Масштаб: 1 км+";
-                }
-
-                TextView scaleView = requireView().findViewById(R.id.scaleText);
-                scaleView.setText(scaleText);
-            });
+            googleMap.setOnMapClickListener(this::onMapClicked);
+            googleMap.setOnCameraIdleListener(this::updateScaleText);
         });
+    }
 
-        return view;
+    private void configureMapUI(GoogleMap googleMap) {
+        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.getUiSettings().setAllGesturesEnabled(true);
+        googleMap.getUiSettings().setCompassEnabled(true);
+        googleMap.getUiSettings().setMapToolbarEnabled(true);
+        googleMap.setBuildingsEnabled(true);
+        googleMap.setTrafficEnabled(true);
+        googleMap.setIndoorEnabled(true);
+    }
+
+    private void onMapClicked(LatLng latLng) {
+        viewModel.createMarkerWithAddress(latLng, requireContext(), (markerOptions, address) -> {
+            Marker marker = googleMapInstance.addMarker(markerOptions);
+            if (marker != null) {
+                marker.showInfoWindow();
+                googleMapInstance.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMapInstance.getCameraPosition().zoom));
+            }
+        });
+    }
+
+    private void updateScaleText() {
+        float zoom = googleMapInstance.getCameraPosition().zoom;
+        String scaleText;
+
+        if (zoom >= 18) {
+            scaleText = "Масштаб: 20 м";
+        } else if (zoom >= 16) {
+            scaleText = "Масштаб: 50 м";
+        } else if (zoom >= 14) {
+            scaleText = "Масштаб: 100 м";
+        } else if (zoom >= 12) {
+            scaleText = "Масштаб: 500 м";
+        } else {
+            scaleText = "Масштаб: 1 км+";
+        }
+
+        TextView scaleView = requireView().findViewById(R.id.scaleText);
+        scaleView.setText(scaleText);
     }
 
     @Override

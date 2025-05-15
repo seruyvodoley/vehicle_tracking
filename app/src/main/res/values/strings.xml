@@ -2,5 +2,6 @@
     <string name="app_name">Vehicle Tracking</string>
     <string name="default_web_client_id">504639269975-mb68hk19g3ukfkk9v327ulglkubb40oi.apps.googleusercontent.com</string>
     <string name="google_maps_key">AIzaSyCVS-NTjrfxc-l5iRXFADlP1N81fAypV2U</string>
+    <string name="openweather_api_key">2f686f6a85c0b6d5526036cfcb1ab5c2</string>
 
 </resources>
