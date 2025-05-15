@@ -1,3 +1,15 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+val openWeatherKey = localProperties.getProperty("OPENWEATHER_API_KEY") ?: ""
+val googleMapsKey = localProperties.getProperty("GOOGLE_MAPS_KEY") ?: ""
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
@@ -5,10 +17,12 @@ plugins {
 
 android {
     namespace = "com.example.vehicletracking"
+
     compileSdk = 35
     android {
         buildFeatures {
             buildConfig = true
+
         }
     }
     defaultConfig {
@@ -19,9 +33,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GOOGLE_MAPS_API_KEY",
-            "\"AIzaSyCVS-NTjrfxc-l5iRXFADlP1N81fAypV2U\""
-        )
+        buildConfigField("String", "OPENWEATHER_API_KEY", "\"${openWeatherKey}\"")
+        buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"${googleMapsKey}\"")
+        resValue ("string", "google_maps_key", "\"${project.properties["MAPS_API_KEY"]}\"")
     }
 
     buildTypes {

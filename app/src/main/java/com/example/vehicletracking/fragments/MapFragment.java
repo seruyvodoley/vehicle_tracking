@@ -1,5 +1,7 @@
 package com.example.vehicletracking.fragments;
+import com.example.vehicletracking.BuildConfig;
 
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -35,7 +39,6 @@ public class MapFragment extends Fragment {
     private double longitude;
     private String carName;
     private MapTrackingViewModel viewModel;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,15 +59,26 @@ public class MapFragment extends Fragment {
             try {
                 latitude = Double.parseDouble(getArguments().getString("latitude", "0.0"));
                 longitude = Double.parseDouble(getArguments().getString("longitude", "0.0"));
+
             } catch (NumberFormatException e) {
                 latitude = 0.0;
                 longitude = 0.0;
             }
             carName = getArguments().getString("carName", "Автомобиль");
+            Log.d("MapFragment", "Start coords: " + latitude + ", " + longitude);
+            Log.d("MapFragment", "car name: " + carName);
+
         }
     }
 
     private void initializeMap() {
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+            return;
+        }
+
         try {
             MapsInitializer.initialize(requireActivity().getApplicationContext());
         } catch (Exception e) {
@@ -78,8 +92,10 @@ public class MapFragment extends Fragment {
             LatLng origin = new LatLng(latitude, longitude);
             LatLng destination = new LatLng(latitude + 0.010, longitude + 0.010);
 
+            googleMap.setMyLocationEnabled(true);
+
             // Погода
-            WeatherHelper.getWeather(origin, getString(R.string.openweather_api_key),
+            WeatherHelper.getWeather(origin, BuildConfig.OPENWEATHER_API_KEY,
                     new WeatherHelper.WeatherCallback() {
                         @Override
                         public void onSuccess(String description, double temperature) {
@@ -95,32 +111,25 @@ public class MapFragment extends Fragment {
                         }
                     });
 
-            // Маршрут
-            DirectionsHelper.getRoute(origin, destination, getString(R.string.google_maps_key),
-                    new DirectionsHelper.RouteCallback() {
-                        @Override
-                        public void onRouteReceived(List<LatLng> routePoints) {
-                            requireActivity().runOnUiThread(() -> {
-                                googleMap.addPolyline(new PolylineOptions()
-                                        .addAll(routePoints)
-                                        .color(Color.BLUE)
-                                        .width(10));
-                                Marker carMarker = googleMap.addMarker(viewModel.getCarMarkerOptions(origin));
-                                viewModel.RouteSimulateMovement(routePoints, googleMap, carMarker);
-                            });
-                        }
 
-                        @Override
-                        public void onError(String message) {
-                            Log.e("RouteError", message);
-                        }
-                    });
+            viewModel.startTracking(carName, googleMap);
 
-            viewModel.startTracking(latitude, longitude, googleMap, carName);
             googleMap.setOnMapClickListener(this::onMapClicked);
             googleMap.setOnCameraIdleListener(this::updateScaleText);
         });
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // initializeMap(); // Запускаем карту, если разрешение получено
+            } else {
+                Log.e("Permissions", "Разрешение на геолокацию не предоставлено");
+            }
+        }
+    }
+
 
     private void configureMapUI(GoogleMap googleMap) {
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
