@@ -1,5 +1,7 @@
 package com.example.vehicletracking.utils;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,14 +26,17 @@ public class WeatherHelper {
 
     public static void getWeather(LatLng location, String apiKey, WeatherCallback callback) {
         OkHttpClient client = new OkHttpClient();
+
         String url = "https://api.openweathermap.org/data/2.5/weather?lat=" +
                 location.latitude + "&lon=" + location.longitude +
                 "&units=metric&lang=ru&appid=" + apiKey;
 
         Request request = new Request.Builder().url(url).build();
+        Log.d("Weather", String.valueOf(request));
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.d("Weather answer", String.valueOf(call));
                 callback.onError("Network error: " + e.getMessage());
             }
 
@@ -43,6 +48,7 @@ public class WeatherHelper {
                 }
 
                 String responseBody = response.body().string();
+                Log.d("Answer", responseBody);
                 try {
                     JSONObject json = new JSONObject(responseBody);
                     String description = json.getJSONArray("weather")

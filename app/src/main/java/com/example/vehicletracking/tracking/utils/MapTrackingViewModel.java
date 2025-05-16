@@ -6,7 +6,7 @@ import android.location.Geocoder;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
+import java.util.Random;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
@@ -56,11 +56,16 @@ public class MapTrackingViewModel extends ViewModel {
                         Log.d("Tracking", "Starting from: " + currentLat + ", " + currentLng);
 
                         handler = new Handler(Looper.getMainLooper());
+
+                        Random random = new Random();
                         runnable = new Runnable() {
                             @Override
                             public void run() {
-                                currentLat += 0.0001;
-                                currentLng += 0.0001;
+                                double latOffset = (random.nextDouble() - 0.5) * 0.0003; // диапазон примерно ±0.00015
+                                double lngOffset = (random.nextDouble() - 0.5) * 0.0003;
+
+                                currentLat += latOffset;
+                                currentLng += lngOffset;
 
                                 LatLng newPosition = new LatLng(currentLat, currentLng);
                                 if (marker != null) {
@@ -68,11 +73,12 @@ public class MapTrackingViewModel extends ViewModel {
                                 }
 
                                 map.moveCamera(CameraUpdateFactory.newLatLng(newPosition));
-                                savePositionToFirestore(doc.getId(), newPosition); // сохраняем в Firestore
+                                savePositionToFirestore(doc.getId(), newPosition);
 
-                                handler.postDelayed(this, 1000);
+                                handler.postDelayed(this, 500);
                             }
                         };
+
                         handler.post(runnable);
                     } else {
                         Log.e("Firestore", "Car not found with name: " + carName);

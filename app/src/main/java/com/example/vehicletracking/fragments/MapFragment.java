@@ -1,6 +1,7 @@
 package com.example.vehicletracking.fragments;
 import com.example.vehicletracking.BuildConfig;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -90,12 +91,11 @@ public class MapFragment extends Fragment {
             configureMapUI(googleMap);
 
             LatLng origin = new LatLng(latitude, longitude);
-            LatLng destination = new LatLng(latitude + 0.010, longitude + 0.010);
 
             googleMap.setMyLocationEnabled(true);
-
+            TextView weatherText = requireView().findViewById(R.id.weatherText);
             // Погода
-            WeatherHelper.getWeather(origin, BuildConfig.OPENWEATHER_API_KEY,
+            WeatherHelper.getWeather(origin, getString(R.string.openweather_api_key),
                     new WeatherHelper.WeatherCallback() {
                         @Override
                         public void onSuccess(String description, double temperature) {

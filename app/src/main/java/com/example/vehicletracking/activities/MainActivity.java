@@ -14,6 +14,7 @@ import com.example.vehicletracking.fragments.MapFragment;
 import com.example.vehicletracking.fragments.ProfileFragment;
 import com.example.vehicletracking.fragments.SignInFragment;
 import com.example.vehicletracking.fragments.TransportFragment;
+import com.example.vehicletracking.utils.RootCheckUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,6 +27,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (RootCheckUtil.isDeviceRooted()) {
+            Toast.makeText(this, "Обнаружено root-устройство. Работа приложения невозможна.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        else{
+            Toast.makeText(this, "Устройство чистое.", Toast.LENGTH_LONG).show();
+        }
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);

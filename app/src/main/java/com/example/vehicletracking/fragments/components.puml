@@ -8,6 +8,8 @@ skinparam defaultTextAlignment center
 ' #DFFFD6 – Tracking Core (логика трекинга)
 ' #F9D6D5 – Simulation (генерация координат)
 ' #EEE8FF – Abstractions (интерфейсы и контракты)
+' #FFFACD – Security (root, API ключи, HTTPS)
+' #E6F0FF – Auth (авторизация, RBAC)
 
 ' ==== UI Layer ====
 package "UI Layer\n[Контроль потока, ограничение видимости]" <<Rectangle>> #CDEAFF {
@@ -15,7 +17,7 @@ package "UI Layer\n[Контроль потока, ограничение вид
 }
 
 ' ==== Tracking Core ====
-package "Tracking Core\n[SRP, DIP, OCP, CCP, миним. связность, макс. связность]" <<Rectangle>> #DFFFD6 {
+package "Tracking Core\n[SRP, DIP, OCP, CCP]" <<Rectangle>> #DFFFD6 {
   [VehicleTracker]
   [MapTrackingViewModel]
 }
@@ -31,9 +33,25 @@ package "Abstractions\n[DIP, устойчивые зависимости]" <<Rec
   [LocationCallback]
 }
 
+' ==== Security Layer ====
+package "Security Layer\n[Root Check, HTTPS, API ключи]" <<Rectangle>> #FFFACD {
+  [RootChecker]
+  [SecureApiConfig]
+}
+
+' ==== Auth Layer ====
+package "Auth Layer\n[RBAC, Firebase Auth]" <<Rectangle>> #E6F0FF {
+  [AuthManager]
+  [UserSession]
+}
+
 ' ==== Directed Dependencies ====
 [MapFragment] --> [MapTrackingViewModel] : uses
+[MapFragment] --> [RootChecker] : checks root
+[MapFragment] --> [AuthManager] : checks login
 [MapTrackingViewModel] --> [VehicleTracker] : controls
+[MapTrackingViewModel] --> [SecureApiConfig] : uses config
+[MapTrackingViewModel] --> [UserSession] : gets userId
 [VehicleTracker] --> [LocationProvider] : depends on abstraction
 [VehicleLocationSimulator] --> [LocationCallback] : callback
 
