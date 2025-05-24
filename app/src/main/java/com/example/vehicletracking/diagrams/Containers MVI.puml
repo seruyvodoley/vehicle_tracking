@@ -1,0 +1,37 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(admin, "Пользователь", "Единственный пользователь с полными правами")
+
+System_Boundary(vehicle_tracking, "Vehicle Tracking System") {
+
+    Container(android_app, "Android App", "Java, MVI + Clean Architecture", "Клиентское приложение для мониторинга автопарка")
+
+    Container(view_layer, "View Layer", "Java (Activity/Fragment + ViewState)", "Отвечает за отображение UI и отправку Intent")
+    Container(presentation_layer, "Presentation Layer", "Java (Reducer, Intent, State)", "Обрабатывает действия пользователя и обновляет состояние UI")
+    Container(domain_layer, "Domain Layer", "Java (Use Cases)", "Бизнес-логика приложения")
+    Container(data_layer, "Data Layer", "Java (Repositories)", "Работает с Firebase, Weather API и локальным хранилищем")
+
+    Container(tracking_core, "Tracking Core", "Firebase Functions", "Серверная логика отслеживания транспорта")
+
+    ContainerDb(firebase_db, "Firebase Firestore", "Облачная база данных", "Хранит информацию о транспорте и пользователях")
+    Container(auth_service, "Firebase Authentication", "Auth API", "Аутентификация пользователя")
+    Container(weather_api, "Weather API", "Внешний сервис", "Предоставляет данные о погоде")
+    Container(notification_service, "Notification Service", "Firebase Cloud Messaging", "Отправляет push-уведомления")
+
+}
+
+Rel(admin, view_layer, "Использует")
+Rel(view_layer, presentation_layer, "Отправляет Intent и получает ViewState")
+Rel(presentation_layer, domain_layer, "Вызывает Use Cases")
+Rel(domain_layer, data_layer, "Обращается к репозиториям")
+Rel(data_layer, firebase_db, "Читает и пишет данные")
+Rel(data_layer, auth_service, "Проходит аутентификацию")
+Rel(auth_service, data_layer, "Возвращает токен авторизации")
+Rel(data_layer, weather_api, "Запрашивает данные о погоде")
+Rel(data_layer, notification_service, "Отправляет уведомления")
+Rel(presentation_layer, tracking_core, "Отправляет события и получает данные")
+
+@enduml

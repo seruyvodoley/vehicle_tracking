@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(admin, "Пользователь", "Единственный пользователь с полными правами и возможностью управлять автопарком")
+
+System_Boundary(vehicle_tracking, "Vehicle Tracking System") {
+    System(vehicle_core, "Vehicle Tracking Core", "Основное приложение для мониторинга и управления автопарком (MVI + Clean Architecture на Java)")
+    System_Ext(firebase, "Firebase Firestore", "Облачная база данных для хранения информации о транспорте и пользователях")
+    System_Ext(auth_service, "Firebase Authentication", "Обеспечивает авторизацию пользователя (Google, email)")
+    System_Ext(weather_api, "Weather API", "Предоставляет актуальные погодные данные")
+    System(supporting_user, "User Management Service", "Подсистема управления аккаунтами и настройками пользователей")
+    System(supporting_notifications, "Notification Service", "Система отправки уведомлений (push, в приложении)")
+}
+
+Rel_D(admin, auth_service, "Проходит авторизацию")
+Rel_D(auth_service, vehicle_core, "Подтверждает учетные данные и права доступа")
+Rel(admin, vehicle_core, "Управляет автопарком и отслеживает транспорт в реальном времени")
+Rel(vehicle_core, firebase, "Читает и записывает данные о транспорте и состоянии автопарка")
+Rel(vehicle_core, weather_api, "Запрашивает погодные условия для маршрутов")
+Rel(admin, supporting_user, "Настраивает параметры и профиль пользователя")
+Rel(vehicle_core, supporting_notifications, "Отправляет уведомления пользователю о важных событиях")
+
+@enduml

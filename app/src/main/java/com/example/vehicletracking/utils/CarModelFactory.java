@@ -8,4 +8,3 @@ import java.util.Objects;
 public interface CarModelFactory {
     CarModel createCarModel(String name, String model, String number, String photoUrl, String lat, String lon);
 }
-

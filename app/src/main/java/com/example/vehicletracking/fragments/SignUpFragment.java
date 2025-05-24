@@ -1,7 +1,6 @@
 package com.example.vehicletracking.fragments;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,22 +8,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.example.vehicletracking.R;
-import com.example.vehicletracking.modelview.SignUpViewModel;
+import com.example.vehicletracking.presentation.SignUpIntent;
+import com.example.vehicletracking.presentation.SignUpState;
+import com.example.vehicletracking.presentation.SignUpViewModel;
 
 public class SignUpFragment extends Fragment {
 
     private EditText edName, edEmail, edPassword;
     private Button signUpButton;
-    private SignUpViewModel signUpViewModel;
+    private SignUpViewModel viewModel;
 
-    public SignUpFragment() {
-    }
+    public SignUpFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -35,28 +35,38 @@ public class SignUpFragment extends Fragment {
         edPassword = view.findViewById(R.id.password);
         signUpButton = view.findViewById(R.id.register);
 
-        signUpViewModel = new ViewModelProvider(this).get(SignUpViewModel.class);
-
-        signUpViewModel.getRegistrationStatus().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String status) {
-                Toast.makeText(getContext(), status, Toast.LENGTH_LONG).show();
-                if (status.equals("Пользователь успешно зарегистрирован")) {
-                    FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, new SignInFragment());
-                    transaction.addToBackStack(null);
-                    transaction.commit();
-                }
-            }
-        });
+        viewModel = new ViewModelProvider(this).get(SignUpViewModel.class);
+        observeViewModel();
 
         signUpButton.setOnClickListener(v -> {
             String name = edName.getText().toString().trim();
             String email = edEmail.getText().toString().trim();
             String password = edPassword.getText().toString().trim();
-            signUpViewModel.signUpUser(name, email, password);
+            viewModel.processIntent(new SignUpIntent.Submit(name, email, password));
         });
 
         return view;
+    }
+
+    private void observeViewModel() {
+        viewModel.getState().observe(getViewLifecycleOwner(), state -> {
+            if (state == null) return;
+
+            if (state.isLoading) {
+                Toast.makeText(getContext(), "Регистрация...", Toast.LENGTH_SHORT).show();
+            } else if (state.success) {
+                Toast.makeText(getContext(), state.message, Toast.LENGTH_LONG).show();
+                navigateToSignIn();
+            } else if (state.message != null) {
+                Toast.makeText(getContext(), state.message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void navigateToSignIn() {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, new SignInFragment());
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

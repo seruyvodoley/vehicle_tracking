@@ -58,7 +58,7 @@ public class TransportFragment extends Fragment {
 
         btnAddCar.setOnClickListener(v -> {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.container, new AddCar_Fragment());
+            transaction.replace(R.id.container, new com.example.vehicletracking.presentation.addcar.AddCarFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });

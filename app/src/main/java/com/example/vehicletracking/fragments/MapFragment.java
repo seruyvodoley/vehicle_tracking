@@ -1,175 +1,105 @@
 package com.example.vehicletracking.fragments;
-import com.example.vehicletracking.BuildConfig;
 
-import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.vehicletracking.R;
-import com.example.vehicletracking.tracking.utils.DirectionsHelper;
-import com.example.vehicletracking.tracking.utils.MapTrackingViewModel;
+import com.example.vehicletracking.presentation.TrackingIntent;
+import com.example.vehicletracking.presentation.TrackingViewModel;
 import com.example.vehicletracking.utils.WeatherHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.List;
+public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-public class MapFragment extends Fragment {
-
+    private GoogleMap googleMap;
     private MapView mapView;
-    private GoogleMap googleMapInstance;
-    private double latitude;
-    private double longitude;
+    private Marker marker;
+    private TrackingViewModel viewModel;
     private String carName;
-    private MapTrackingViewModel viewModel;
-    @Nullable
+    private TextView weatherText;
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            carName = getArguments().getString("carName");
+        }
+        viewModel = new ViewModelProvider(this).get(TrackingViewModel.class);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = view.findViewById(R.id.mapView);
+        weatherText = view.findViewById(R.id.weatherText); // обязательно добавь в XML
         mapView.onCreate(savedInstanceState);
-        mapView.onResume();
-
-        extractArguments();
-        initializeMap();
-        viewModel = new ViewModelProvider(this).get(MapTrackingViewModel.class);
-
+        mapView.getMapAsync(this);
         return view;
     }
 
-    private void extractArguments() {
-        if (getArguments() != null) {
-            try {
-                latitude = Double.parseDouble(getArguments().getString("latitude", "0.0"));
-                longitude = Double.parseDouble(getArguments().getString("longitude", "0.0"));
-
-            } catch (NumberFormatException e) {
-                latitude = 0.0;
-                longitude = 0.0;
-            }
-            carName = getArguments().getString("carName", "Автомобиль");
-            Log.d("MapFragment", "Start coords: " + latitude + ", " + longitude);
-            Log.d("MapFragment", "car name: " + carName);
-
-        }
-    }
-
-    private void initializeMap() {
-        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 100);
-            return;
-        }
-
-        try {
-            MapsInitializer.initialize(requireActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mapView.getMapAsync(googleMap -> {
-            googleMapInstance = googleMap;
-            configureMapUI(googleMap);
-
-            LatLng origin = new LatLng(latitude, longitude);
-
-            googleMap.setMyLocationEnabled(true);
-            TextView weatherText = requireView().findViewById(R.id.weatherText);
-            // Погода
-            WeatherHelper.getWeather(origin, getString(R.string.openweather_api_key),
-                    new WeatherHelper.WeatherCallback() {
-                        @Override
-                        public void onSuccess(String description, double temperature) {
-                            requireActivity().runOnUiThread(() -> {
-                                TextView weatherText = requireView().findViewById(R.id.weatherText);
-                                weatherText.setText("Погода: " + description + ", " + temperature + "°C");
-                            });
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            Log.e("WeatherError", message);
-                        }
-                    });
-
-
-            viewModel.startTracking(carName, googleMap);
-
-            googleMap.setOnMapClickListener(this::onMapClicked);
-            googleMap.setOnCameraIdleListener(this::updateScaleText);
-        });
-    }
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 100) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // initializeMap(); // Запускаем карту, если разрешение получено
-            } else {
-                Log.e("Permissions", "Разрешение на геолокацию не предоставлено");
-            }
+    public void onMapReady(GoogleMap map) {
+        googleMap = map;
+
+        if (carName != null) {
+            viewModel.processIntent(new TrackingIntent.StartTracking(carName));
         }
-    }
 
+        viewModel.getState().observe(getViewLifecycleOwner(), state -> {
+            if (state.error != null) {
+                Toast.makeText(requireContext(), "Ошибка: " + state.error, Toast.LENGTH_SHORT).show();
+            } else if (state.isTracking) {
+                LatLng position = new LatLng(state.latitude, state.longitude);
 
-    private void configureMapUI(GoogleMap googleMap) {
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        googleMap.getUiSettings().setZoomControlsEnabled(true);
-        googleMap.getUiSettings().setAllGesturesEnabled(true);
-        googleMap.getUiSettings().setCompassEnabled(true);
-        googleMap.getUiSettings().setMapToolbarEnabled(true);
-        googleMap.setBuildingsEnabled(true);
-        googleMap.setTrafficEnabled(true);
-        googleMap.setIndoorEnabled(true);
-    }
+                if (marker == null) {
+                    marker = googleMap.addMarker(new MarkerOptions().position(position).title(carName));
+                } else {
+                    marker.setPosition(position);
+                }
 
-    private void onMapClicked(LatLng latLng) {
-        viewModel.createMarkerWithAddress(latLng, requireContext(), (markerOptions, address) -> {
-            Marker marker = googleMapInstance.addMarker(markerOptions);
-            if (marker != null) {
-                marker.showInfoWindow();
-                googleMapInstance.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMapInstance.getCameraPosition().zoom));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+
+                // Получаем и отображаем погоду (один раз)
+                fetchWeatherIfNeeded(position);
             }
         });
     }
 
-    private void updateScaleText() {
-        float zoom = googleMapInstance.getCameraPosition().zoom;
-        String scaleText;
+    private boolean weatherLoaded = false;
 
-        if (zoom >= 18) {
-            scaleText = "Масштаб: 20 м";
-        } else if (zoom >= 16) {
-            scaleText = "Масштаб: 50 м";
-        } else if (zoom >= 14) {
-            scaleText = "Масштаб: 100 м";
-        } else if (zoom >= 12) {
-            scaleText = "Масштаб: 500 м";
-        } else {
-            scaleText = "Масштаб: 1 км+";
-        }
+    private void fetchWeatherIfNeeded(LatLng latLng) {
+        if (weatherLoaded) return;
 
-        TextView scaleView = requireView().findViewById(R.id.scaleText);
-        scaleView.setText(scaleText);
+        WeatherHelper.getWeather(latLng, getString(R.string.openweather_api_key), new WeatherHelper.WeatherCallback() {
+            @Override
+            public void onSuccess(String description, double temperature) {
+                requireActivity().runOnUiThread(() -> {
+                    weatherText.setText("Погода: " + description + ", " + temperature + "°C");
+                    weatherLoaded = true;
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                requireActivity().runOnUiThread(() -> {
+                    weatherText.setText("Ошибка загрузки погоды");
+                });
+            }
+        });
     }
 
     @Override
@@ -180,13 +110,13 @@ public class MapFragment extends Fragment {
 
     @Override
     public void onPause() {
-        mapView.onPause();
-        viewModel.stopTracking();
         super.onPause();
+        mapView.onPause();
     }
 
     @Override
     public void onDestroy() {
+        viewModel.processIntent(new TrackingIntent.StopTracking());
         mapView.onDestroy();
         super.onDestroy();
     }

@@ -2,7 +2,6 @@ package com.example.vehicletracking.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,16 +9,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.vehicletracking.R;
 import com.example.vehicletracking.activities.MainActivity;
-import com.example.vehicletracking.modelview.SignInViewModel;
+import com.example.vehicletracking.presentation.SignInEffect;
+import com.example.vehicletracking.presentation.SignInIntent;
+import com.example.vehicletracking.presentation.SignInState;
+import com.example.vehicletracking.presentation.SignInViewModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -34,8 +34,8 @@ import io.github.rupinderjeet.kprogresshud.KProgressHUD;
 public class SignInFragment extends Fragment {
 
     private EditText edEmail, edPassword;
-    private Button SignInbutton, GoogleSignIn_button;
-    private SignInViewModel signInViewModel;
+    private Button btnSignIn, btnGoogleSignIn;
+    private SignInViewModel viewModel;
     private KProgressHUD progressHUD;
 
     private final int REQUEST_CODE = 100;
@@ -49,44 +49,64 @@ public class SignInFragment extends Fragment {
 
         edEmail = view.findViewById(R.id.email);
         edPassword = view.findViewById(R.id.password);
-        SignInbutton = view.findViewById(R.id.signin);
-        GoogleSignIn_button = view.findViewById(R.id.GoogleSignIn_button);
+        btnSignIn = view.findViewById(R.id.signin);
+        btnGoogleSignIn = view.findViewById(R.id.GoogleSignIn_button);
 
-        signInViewModel = new ViewModelProvider(this).get(SignInViewModel.class);
-        signInViewModel.getLoginStatus().observe(getViewLifecycleOwner(), status -> {
-            if (progressHUD != null && progressHUD.isShowing()) {
-                progressHUD.dismiss();
-            }
+        viewModel = new ViewModelProvider(this).get(SignInViewModel.class);
 
-            Toast.makeText(getContext(), status, Toast.LENGTH_SHORT).show();
-            if (status.equals("Вход выполнен успешно")) {
-                Intent intent = new Intent(getActivity(), MainActivity.class);
-                startActivity(intent);
-            }
+        // Наблюдаем за состоянием
+        viewModel.getState().observe(getViewLifecycleOwner(), this::renderState);
+        viewModel.getEffect().observe(getViewLifecycleOwner(), this::handleEffect);
+
+        btnSignIn.setOnClickListener(v -> {
+            String email = edEmail.getText().toString().trim();
+            String password = edPassword.getText().toString().trim();
+            viewModel.processIntent(new SignInIntent.SignInWithEmail(email, password));
         });
 
-        // Кнопка перехода на регистрацию
+        btnGoogleSignIn.setOnClickListener(v -> {
+            showProgress();
+            Intent intent = signInClient.getSignInIntent();
+            startActivityForResult(intent, REQUEST_CODE);
+        });
+
         Button btnRegister = view.findViewById(R.id.btnRegisterTab);
         btnRegister.setOnClickListener(v -> {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.container, new SignUpFragment()); // Переключаем на регистрацию
+            transaction.replace(R.id.container, new SignUpFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
 
-        GoogleSignIn_button.setOnClickListener(v -> SignIn());
-        SignInbutton.setOnClickListener(v -> SignInUser());
-
-        CreateRequest();
+        setupGoogleSignIn();
 
         return view;
     }
 
-    private void SignIn() {
-        // Инициализация и отображение прогресса
-        ProgressBar();
-        Intent intent = signInClient.getSignInIntent();
-        startActivityForResult(intent, REQUEST_CODE);
+    private void renderState(SignInState state) {
+        if (state.isLoading) {
+            showProgress();
+        } else {
+            hideProgress();
+        }
+    }
+
+    private void handleEffect(SignInEffect effect) {
+        if (effect instanceof SignInEffect.NavigateToMainScreen) {
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+        } else if (effect instanceof SignInEffect.ShowToast) {
+            String msg = ((SignInEffect.ShowToast) effect).message;
+            Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupGoogleSignIn() {
+        GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        signInClient = GoogleSignIn.getClient(requireContext(), options);
     }
 
     @Override
@@ -97,37 +117,27 @@ public class SignInFragment extends Fragment {
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-                signInViewModel.signInWithGoogle(credential);
+                viewModel.processIntent(new SignInIntent.SignInWithGoogle(credential));
             } catch (ApiException e) {
-                if (progressHUD != null && progressHUD.isShowing()) {
-                    progressHUD.dismiss();
-                }
-                Toast.makeText(getContext(), "Ошибка входа через Google: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                hideProgress();
+                Toast.makeText(getContext(), "Ошибка Google входа: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void SignInUser() {
-        String email = edEmail.getText().toString().trim();
-        String password = edPassword.getText().toString().trim();
-        signInViewModel.signInWithEmailAndPassword(email, password);
+    private void showProgress() {
+        if (progressHUD == null) {
+            progressHUD = KProgressHUD.create(requireContext())
+                    .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                    .setCancellable(false)
+                    .setLabel("Загрузка...");
+        }
+        progressHUD.show();
     }
 
-    private void CreateRequest() {
-        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        signInClient = GoogleSignIn.getClient(getContext(), signInOptions);
-    }
-
-    // Метод для отображения индикатора загрузки
-    private void ProgressBar() {
-        progressHUD = KProgressHUD.create(requireContext())
-                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
-                .setMaxProgress(100)
-                .setBackgroundColor(R.color.blue_light)
-                .show();
-        progressHUD.setProgress(90);
+    private void hideProgress() {
+        if (progressHUD != null && progressHUD.isShowing()) {
+            progressHUD.dismiss();
+        }
     }
 }
